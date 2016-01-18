@@ -1,0 +1,22 @@
+{
+  "name": "fave-meals-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cbautista1002/FaveMealsServer.git"
+  },
+  "author": "Carlos Bautista",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cbautista1002/FaveMealsServer/issues"
+  },
+  "homepage": "https://github.com/cbautista1002/FaveMealsServer#readme",
+  "dependencies": {
+    "hapi": "^12.1.0"
+  }
+}
