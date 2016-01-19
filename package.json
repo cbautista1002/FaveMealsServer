@@ -20,5 +20,8 @@
     "good": "^6.4.0",
     "good-console": "^5.2.0",
     "hapi": "^12.1.0"
+  },
+  "devDependencies": {
+    "rethinkdb": "^2.2.1"
   }
 }

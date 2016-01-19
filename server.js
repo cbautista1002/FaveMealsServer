@@ -2,12 +2,14 @@
 
 const Hapi = require('hapi');
 const Good = require('good');
+const r = require('rethinkdb');
+const rConfig = require(__dirname+"/data/config.js");
 
 
 const server = new Hapi.Server();
 server.connection({
   port: 3000,
-  // Enable this API to be hit by any webpage
+  // Enable this API to be hit by any domain
   routes: { cors: true }
 });
 
@@ -21,52 +23,85 @@ server.route({
 });
 
 
-server.route({
-  method: 'GET',
-  path: '/{name}',
-  handler: function(request, reply){
-    // http://hapijs.com/tutorials
-    // Note that we URI encode the name parameter, this is to prevent
-    // content injection attacks. Remember, it's never a good idea to render
-    // user provided data without output encoding it first!
-    reply('Hello, ' + encodeURIComponent(request.params.name) + '!');
-  }
-});
+// server.route({
+//   method: 'GET',
+//   path: '/{name}',
+//   handler: function(request, reply){
+//     // http://hapijs.com/tutorials
+//     // Note that we URI encode the name parameter, this is to prevent
+//     // content injection attacks. Remember, it's never a good idea to render
+//     // user provided data without output encoding it first!
+//     reply('Hello, ' + encodeURIComponent(request.params.name) + '!');
+//   }
+// });
 
 
 server.route({
   method: 'GET',
   path: '/{userName}/meals',
+
   handler: function(request, reply){
-    let val = [{
-      userName: request.params.userName,
-      item: 'Chicken',
-      restaurant: 'Vegetarian Paradise',
-      stars: [1,2,3,4],
-      info: 'too spicy lkdsjflksdj fklsjd lkfjs dlkf',
-      postedOn: '1 month ago',
-      numLikes: 8
-    }, {
-      userName: request.params.userName,
-      item: 'Turkey',
-      restaurant: 'Red Bamboo',
-      stars: [1,2],
-      info: 'super bland',
-      postedOn: '2 days ago',
-      numLikes: 2
-    }, {
-      userName: request.params.userName,
-      item: 'BBQ Wings',
-      restaurant: 'Vegetarian Paradise',
-      stars: [1,2,3,4,5],
-      info: 'perfect',
-      postedOn: '6 months ago',
-      numLikes: 87
-    }];
-    reply(val);
+
+    r.connect(rConfig.rethinkdb, function(err, conn){
+      if(err)throw err;
+      let rConn = conn;
+
+      r.db('test').table('meals').run(rConn, function(err, cursor){
+        if (err) throw err;
+        cursor.toArray(function(err, result){
+          if(err) throw err;
+          let val = JSON.stringify(result, null, 2);
+          console.log(val);
+          reply(val);
+        });
+      });
+    });
   }
 });
 
+
+server.route({
+  method: 'POST',
+  path: '/new',
+
+  handler: function(request, reply){
+    console.log("Received POST: " + request.payload);
+
+    let newMeal = JSON.parse(request.payload);
+
+    r.connect(rConfig.rethinkdb, function(err, conn){
+      if(err)throw err;
+
+      let rConn = conn;
+      var numStars = newMeal.stars;
+      var starList = Array.apply(null, {length: numStars}).map(Number.call, Number)
+
+      console.log(newMeal.item);
+      console.log(newMeal.restaurant);
+      console.log(starList);
+      console.log(newMeal.info);
+
+      r.db('test').table('meals').insert({
+        timestamp: new Date(),
+        userName: 'Carlos',
+        item: newMeal.item,
+        restaurant: newMeal.restaurant,
+        stars: starList,
+        info: newMeal.info,
+        postedOn: '1 month ago',
+        numLikes: 8
+      }).run(rConn, function(err, result) {
+        if (err) throw err;
+        console.log(JSON.stringify(result, null, 2));
+      });
+
+    });
+
+
+
+    reply('Created new meal');
+  }
+});
 
 server.register({
   register: Good,
