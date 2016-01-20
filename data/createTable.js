@@ -50,7 +50,8 @@ r.connect(config.rethinkdb, function(err, conn) {
 //     });
 // });
 
-  r.db('test').table("meals").get("8175c2e2-f25e-4b4c-bfd7-0b632235884a").delete().run(rConn)
+//  r.db('test').table("meals").get("8175c2e2-f25e-4b4c-bfd7-0b632235884a").delete().run(rConn)
+r.db('test').table('meals').indexCreate('timestamp').run(conn, function(){console.log('done')});
 })
 
 

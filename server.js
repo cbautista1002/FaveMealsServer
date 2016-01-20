@@ -46,7 +46,7 @@ server.route({
       if(err)throw err;
       let rConn = conn;
 
-      r.db('test').table('meals').run(rConn, function(err, cursor){
+      r.db('test').table('meals').orderBy({index: r.desc('timestamp')}).run(rConn, function(err, cursor){
         if (err) throw err;
         cursor.toArray(function(err, result){
           if(err) throw err;
@@ -96,9 +96,6 @@ server.route({
       });
 
     });
-
-
-
     reply('Created new meal');
   }
 });
