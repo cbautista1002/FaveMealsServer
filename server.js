@@ -2,12 +2,14 @@
 
 const Hapi = require('hapi');
 const Good = require('good');
+const Yelp = require('yelp');
 const r = require('rethinkdb');
 const rConfig = require(__dirname+"/data/config.js");
 
 
 const server = new Hapi.Server();
 server.connection({
+  host: '0.0.0.0',
   port: 3000,
   // Enable this API to be hit by any domain
   routes: { cors: true }
@@ -99,6 +101,35 @@ server.route({
     reply('Created new meal');
   }
 });
+
+
+var yelp = new Yelp({
+  consumer_key: 'yc93F1bjrOLmzeKbCctkTA',
+  consumer_secret: 'Px42KJg-lzDFfNX-v9Nn1Yw96HI',
+  token: 'X8UAutSW7fOBMu9xNff47P5tOZKm5_Tu',
+  token_secret: '9fJ6v5XZyLAajFk1EHkB-U-ZZxg',
+});
+
+
+server.route({
+  method: 'GET',
+  path: '/get-restaurants',
+
+  handler: function(request, reply){
+    yelp.search({ term: 'restaurant', location: '10033' })
+
+    .then(function (data) {
+      console.log(data);
+      let names = data.businesses.map((business) => business.name);
+      reply(names);
+    })
+
+    .catch(function (err) {
+      console.error(err);
+    });
+  }
+});
+
 
 server.register({
   register: Good,
